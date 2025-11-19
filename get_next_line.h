@@ -6,7 +6,7 @@
 /*   By: demane <emanedanielakim@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 14:32:11 by demane            #+#    #+#             */
-/*   Updated: 2025/11/18 15:13:59 by demane           ###   ########.fr       */
+/*   Updated: 2025/11/19 13:50:47 by demane           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,9 +21,9 @@
 # include "stdlib.h"
 
 typedef struct s_line{
-	char	*line;
-	int		fd;
-	s_line	*next;
+	char			*line;
+	int				fd;
+	struct s_line	*next;
 }	t_line;
 
 char	*get_next_line(int fd);
