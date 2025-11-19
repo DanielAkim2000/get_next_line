@@ -6,7 +6,7 @@
 /*   By: demane <emanedanielakim@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 14:32:17 by demane            #+#    #+#             */
-/*   Updated: 2025/11/19 17:52:50 by demane           ###   ########.fr       */
+/*   Updated: 2025/11/19 18:39:51 by demane           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,8 +52,9 @@ int	ft_include_new_line(char *str)
 		return (0);
 	while (str[i])
 	{
-		if (str[i++] == '\n')
+		if (str[i] == '\n')
 			return (1);
+		i++;
 	}
 	return (0);
 }
@@ -67,6 +68,11 @@ void	ft_reintialise(char *return_value, t_line **l)
 		i++;
 	if (return_value[i] == '\n' && return_value[i + 1])
 		(*l)->line = (*l)->line + i + 1;
+	else if (return_value[i] == '\0')
+	{
+		free((*l)->line);
+		(*l)->line = NULL;
+	}
 	else
 	{
 		free((*l)->line);
@@ -82,7 +88,7 @@ char	*ft_return_line(t_line *l)
 	int		n;
 
 	i = 0;
-	if (l || l->line)
+	if (!l || !l->line)
 		return (NULL);
 	str = l->line;
 	while (str[i] && str[i] != '\n')
@@ -118,10 +124,15 @@ void	ft_recup_next_line(t_line *l)
 	{
 		buffer = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
 		size_read = read(l->fd, buffer, BUFFER_SIZE);
-		tmp = ft_strjoin(l->line, buffer);
-		free(l->line);
-		free(buffer);
-		l->line = tmp;
+		// if (size_read != -1)
+		// {
+			tmp = ft_strjoin(l->line, buffer);
+			if (l->line)
+				free(l->line);
+			if (buffer)
+				free(buffer);
+			l->line = tmp;
+		// }
 	}
 }
 
