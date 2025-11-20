@@ -6,7 +6,7 @@
 /*   By: demane <emanedanielakim@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 14:32:17 by demane            #+#    #+#             */
-/*   Updated: 2025/11/20 01:32:08 by demane           ###   ########.fr       */
+/*   Updated: 2025/11/20 11:44:28 by demane           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,22 +68,24 @@ int	ft_include_new_line(char *str)
 	return (0);
 }
 
-void	ft_reintialise(char *r, t_line **l)
+void	ft_reintialise(t_line **l)
 {
 	int		i;
 	int		j;
 	char	*lastvalue;
+	char	*str;
 
-	if (ft_include_new_line(r))
+	str = (*l)->line;
+	if (ft_include_new_line(str))
 	{
-		j = ft_strlen(r);
-		while (r[j] != '\n')
+		j = ft_strlen(str);
+		while (str[j] != '\n')
 			j--;
 		lastvalue = (*l)->line;
-		(*l)->line = (char *)malloc(sizeof(char) * (j + 1));
+		(*l)->line = (char *)malloc(sizeof(char) * (ft_strlen(str) - j + 1));
 		i = 0;
 		while (j)
-			(*l)->line[i++] = r[ft_strlen(r) - 1 - j--];
+			(*l)->line[i++] = str[ft_strlen(str) - 1 - j--];
 		(*l)->line[i] = '\0';
 		free(lastvalue);
 	}
@@ -123,7 +125,7 @@ char	*ft_return_line(t_line *l)
 	if (str[i] == '\n')
 		r_str[i++] = '\n';
 	r_str[i] = '\0';
-	ft_reintialise(r_str, &l);
+	ft_reintialise(&l);
 	return (r_str);
 }
 
@@ -142,15 +144,22 @@ void	ft_recup_next_line(t_line *l)
 	{
 		buffer = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
 		size_read = read(l->fd, buffer, BUFFER_SIZE);
-		printf("\nsize-read:%ld\n", size_read);
-		// if (size_read >= 0)
-		// {
+		if (size_read <= 0)
+		{
+			if (l->line)
+				free(l->line);
+			l->line = NULL;
+		}
+		else
+		{
 			buffer[size_read] = '\0';
 			line = l->line;
 			tmp = ft_strjoin(line, buffer);
+			free(l->line);
 			l->line = tmp;
-			printf("\nline:%s\n", l->line);
-		// }
+		}
+		if (buffer)
+			free(buffer);
 	}
 }
 
@@ -188,18 +197,18 @@ char	*get_next_line(int fd)
 	t_line			*current;
 
 
-	if (fd <= 0 || BUFFER_SIZE < 1)
+	if (fd < 0 || BUFFER_SIZE < 1)
 		return (NULL);
 	current = ft_init_line(&l, fd);
 	ft_recup_next_line(current);
 	return (ft_return_line(current));
 }
 
-int main(void)
-{
-	int fd = open("file.txt", O_RDONLY);
-	printf("\nNext_line:%s\n", get_next_line(fd));
-	close(fd);
-}
+// int main(void)
+// {
+// 	int fd = open("file.txt", O_RDONLY);
+// 	printf("\nNext_line:%s", get_next_line(fd));
+// 	close(fd);
+// }
 
 
