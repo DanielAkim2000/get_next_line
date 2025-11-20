@@ -6,7 +6,7 @@
 /*   By: demane <emanedanielakim@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 14:32:11 by demane            #+#    #+#             */
-/*   Updated: 2025/11/19 13:50:47 by demane           ###   ########.fr       */
+/*   Updated: 2025/11/20 00:57:02 by demane           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 
 # include "unistd.h"
 # include "stdlib.h"
+# include <fcntl.h>
 
 typedef struct s_line{
 	char			*line;
