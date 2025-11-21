@@ -6,7 +6,7 @@
 /*   By: demane <emanedanielakim@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 14:32:17 by demane            #+#    #+#             */
-/*   Updated: 2025/11/21 18:05:32 by demane           ###   ########.fr       */
+/*   Updated: 2025/11/22 00:51:23 by demane           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,30 +25,29 @@ size_t	ft_strlen(const char *str)
 	return (i);
 }
 
-char	*ft_strjoin(char const *s1, char const *s2)
+char	*ft_strjoin(char const *s1, char const *s2, int *len_line)
 {
 	int		len_malloc;
 	char	*str;
 	char	*ptr;
-	char	*tmp;
-	char	*tmp2;
 
 	if (!s1 && !s2)
 		return (NULL);
 	if (!s2)
 		s2 = "";
-	tmp = (char *)s1;
-	tmp2 = (char *)s2;
-	len_malloc = ft_strlen(s1) + ft_strlen(s2);
+	if (!*len_line)
+		len_malloc = ft_strlen(s1) + ft_strlen(s2);
+	len_malloc = *len_line + ft_strlen(s2);
 	str = (char *)malloc(sizeof(char) * (len_malloc + 1));
 	if (!str)
 		return (NULL);
 	ptr = &str[0];
-	while (tmp && *(tmp))
-		*(str++) = *(tmp++);
-	while (*tmp2)
-		*(str++) = *(tmp2++);
+	while (s1 && *(s1))
+		*(str++) = (char)*(s1++);
+	while (*s2)
+		*(str++) = (char)*(s2++);
 	*str = '\0';
+	*len_line = len_malloc;
 	return (ptr);
 }
 
@@ -59,13 +58,9 @@ int	ft_include_new_line(char *str)
 	i = 0;
 	if (!str)
 		return (0);
-	while (str[i])
-	{
-		if (str[i] == '\n')
-			return (1);
+	while (str[i] && str[i] != '\n')
 		i++;
-	}
-	return (0);
+	return (!!str[i]);
 }
 
 void	ft_supp_maillon(t_line **l, int fd)
@@ -117,7 +112,10 @@ int	ft_reintialise(t_line **l)
 		lastvalue = (*l)->line;
 		(*l)->line = (char *)malloc(sizeof(char) * (ft_strlen(str) - j + 1));
 		if ((*l)->line == NULL)
+		{
+			free(lastvalue);
 			return (1);
+		}
 		i = 0;
 		while (str[++j])
 			(*l)->line[i++] = str[j];
@@ -176,13 +174,17 @@ int	ft_recup_next_line(t_line *l)
 	char			*buffer;
 	char			*tmp;
 	char			*line;
+	int				len_line;
 
 	size_read = BUFFER_SIZE;
 	buffer = NULL;
-	while (!ft_include_new_line(l->line) && size_read == BUFFER_SIZE
+	len_line = ft_strlen(l->line);
+	while (!ft_include_new_line(buffer) && size_read == BUFFER_SIZE
 		&& size_read != -1)
 	{
-		buffer = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
+		if (buffer)
+			free(buffer);
+		buffer = (char *)malloc(sizeof(char) * (BUFFER_SIZE * 2 + 1));
 		if (!buffer)
 			return (-1);
 		size_read = read(l->fd, buffer, BUFFER_SIZE);
@@ -196,13 +198,12 @@ int	ft_recup_next_line(t_line *l)
 		{
 			buffer[size_read] = '\0';
 			line = l->line;
-			tmp = ft_strjoin(line, buffer);
+			tmp = ft_strjoin(line, buffer, &len_line);
 			free(l->line);
 			l->line = tmp;
 		}
-		if (buffer)
-			free(buffer);
 	}
+	free(buffer);
 	return (size_read);
 }
 

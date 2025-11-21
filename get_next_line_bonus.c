@@ -118,7 +118,10 @@ int	ft_reintialise(t_line **l)
 		lastvalue = (*l)->line;
 		(*l)->line = (char *)malloc(sizeof(char) * (ft_strlen(str) - j + 1));
 		if ((*l)->line == NULL)
+		{
+			free(lastvalue);
 			return (1);
+		}
 		i = 0;
 		while (str[++j])
 			(*l)->line[i++] = str[j];
