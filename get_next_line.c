@@ -6,7 +6,7 @@
 /*   By: demane <emanedanielakim@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 14:32:17 by demane            #+#    #+#             */
-/*   Updated: 2025/11/20 11:44:28 by demane           ###   ########.fr       */
+/*   Updated: 2025/11/21 18:05:32 by demane           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,40 @@ int	ft_include_new_line(char *str)
 	return (0);
 }
 
-void	ft_reintialise(t_line **l)
+void	ft_supp_maillon(t_line **l, int fd)
+{
+	t_line	*prev;
+	t_line	*next;
+	t_line	*current;
+
+	prev = NULL;
+	next = NULL;
+	if (*l)
+	{
+		current = *l;
+		while (current)
+		{
+			next = current->next;
+			if (current->fd == fd)
+			{
+				if (prev)
+					prev->next = next;
+				else
+					*l = next;
+				if (current->line)
+					free(current->line);
+				free(current);
+				current = NULL;
+			}
+			if (current)
+				prev = current;
+			current = next;
+		}
+	}
+}
+
+
+int	ft_reintialise(t_line **l)
 {
 	int		i;
 	int		j;
@@ -78,14 +111,16 @@ void	ft_reintialise(t_line **l)
 	str = (*l)->line;
 	if (ft_include_new_line(str))
 	{
-		j = ft_strlen(str);
+		j = 0;
 		while (str[j] != '\n')
-			j--;
+			j++;
 		lastvalue = (*l)->line;
 		(*l)->line = (char *)malloc(sizeof(char) * (ft_strlen(str) - j + 1));
+		if ((*l)->line == NULL)
+			return (1);
 		i = 0;
-		while (j)
-			(*l)->line[i++] = str[ft_strlen(str) - 1 - j--];
+		while (str[++j])
+			(*l)->line[i++] = str[j];
 		(*l)->line[i] = '\0';
 		free(lastvalue);
 	}
@@ -95,6 +130,7 @@ void	ft_reintialise(t_line **l)
 			free((*l)->line);
 		(*l)->line = NULL;
 	}
+	return (0);
 }
 
 char	*ft_return_line(t_line *l)
@@ -105,7 +141,7 @@ char	*ft_return_line(t_line *l)
 	int		n;
 
 	i = 0;
-	if (!l || !l->line)
+	if (!l || !l->line || l->line[0] == '\0')
 		return (NULL);
 	str = l->line;
 	while (str[i] && str[i] != '\n')
@@ -125,26 +161,32 @@ char	*ft_return_line(t_line *l)
 	if (str[i] == '\n')
 		r_str[i++] = '\n';
 	r_str[i] = '\0';
-	ft_reintialise(&l);
+	if (ft_reintialise(&l))
+	{
+		free(r_str);
+		return (NULL);
+	}
 	return (r_str);
 }
 
 
-
-void	ft_recup_next_line(t_line *l)
+int	ft_recup_next_line(t_line *l)
 {
-	size_t			size_read;
+	int				size_read;
 	char			*buffer;
 	char			*tmp;
 	char			*line;
 
 	size_read = BUFFER_SIZE;
 	buffer = NULL;
-	while (!ft_include_new_line(l->line) && size_read == BUFFER_SIZE)
+	while (!ft_include_new_line(l->line) && size_read == BUFFER_SIZE
+		&& size_read != -1)
 	{
 		buffer = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
+		if (!buffer)
+			return (-1);
 		size_read = read(l->fd, buffer, BUFFER_SIZE);
-		if (size_read <= 0)
+		if (size_read == -1)
 		{
 			if (l->line)
 				free(l->line);
@@ -161,6 +203,7 @@ void	ft_recup_next_line(t_line *l)
 		if (buffer)
 			free(buffer);
 	}
+	return (size_read);
 }
 
 t_line	*ft_init_line(t_line **l, int fd)
@@ -170,7 +213,11 @@ t_line	*ft_init_line(t_line **l, int fd)
 
 	tmp = *l;
 	if (!tmp)
+	{
 		(*l) = (t_line *)malloc(sizeof(t_line) * 1);
+		if (!*l)
+			return (NULL);
+	}
 	else
 	{
 		while (tmp)
@@ -181,6 +228,8 @@ t_line	*ft_init_line(t_line **l, int fd)
 			tmp = tmp->next;
 		}
 		tmp = (t_line *)malloc(sizeof(t_line) * 1);
+		if (!tmp)
+			return (NULL);
 		prev->next = tmp;
 	}
 	if (!tmp)
@@ -195,19 +244,39 @@ char	*get_next_line(int fd)
 {
 	static t_line	*l = NULL;
 	t_line			*current;
+	int				result_recup;
+	char			*rv;
 
 
 	if (fd < 0 || BUFFER_SIZE < 1)
 		return (NULL);
 	current = ft_init_line(&l, fd);
-	ft_recup_next_line(current);
-	return (ft_return_line(current));
+	if (!current)
+		return (NULL);
+	result_recup = ft_recup_next_line(current);
+	if (result_recup == -1)
+	{
+		ft_supp_maillon(&l, fd);
+		return (NULL);
+	}
+	rv = ft_return_line(current);
+	if (!rv)
+		ft_supp_maillon(&l, fd);
+	return (rv);
 }
+
 
 // int main(void)
 // {
+// 	char	*nl;
+
 // 	int fd = open("file.txt", O_RDONLY);
-// 	printf("\nNext_line:%s", get_next_line(fd));
+// 	nl = get_next_line(fd);
+// 	printf("\nNext_line:%s", nl);
+// 	free(nl);
+// 	nl = get_next_line(fd);
+// 	printf("\nNext_line:%s", nl);
+// 	free(nl);
 // 	close(fd);
 // }
 
