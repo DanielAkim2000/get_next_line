@@ -13,7 +13,6 @@
 
 #include "get_next_line.h"
 #include <stdio.h>
-
 size_t	ft_strlen(const char *str)
 {
 	size_t	i;
@@ -26,30 +25,43 @@ size_t	ft_strlen(const char *str)
 	return (i);
 }
 
-char	*ft_strjoin(char const *s1, char const *s2)
+char	*ft_strjoin(char *s1, char const *s2, int *lastlen)
 {
-	int		len_malloc;
 	char	*str;
 	char	*ptr;
-	char	*tmp;
-	char	*tmp2;
+	int		i;
+	int		len_s2;
+	int		len_s1;
 
 	if (!s1 && !s2)
 		return (NULL);
 	if (!s2)
 		s2 = "";
-	tmp = (char *)s1;
-	tmp2 = (char *)s2;
-	len_malloc = ft_strlen(s1) + ft_strlen(s2);
-	str = (char *)malloc(sizeof(char) * (len_malloc + 1));
-	if (!str)
-		return (NULL);
-	ptr = &str[0];
-	while (tmp && *(tmp))
-		*(str++) = *(tmp++);
-	while (*tmp2)
-		*(str++) = *(tmp2++);
-	*str = '\0';
+	i = -1;
+	len_s1 = ft_strlen(s1);
+	len_s2 = ft_strlen(s2);
+	if ((len_s1 + len_s2) >= *lastlen || *lastlen == 0)
+	{
+		str = (char *)malloc(sizeof(char) * ((len_s1 + len_s2) * 2 + 1));
+		if (!str)
+			return (s1 ? free(s1) : (void)0, NULL);
+		ptr = &str[0];
+		while (s1 && s1[++i])
+			str[i]= s1[i];
+		i = -1;
+		while (s2[++i])
+			str[len_s1 + i] = s2[i];
+		*lastlen = ((len_s1 + len_s2)) * 2 + 1;
+		s1 ? free(s1): NULL;
+	}
+	else
+	{
+		str = s1;
+		ptr = &str[0];
+		while (s2[++i])
+			str[len_s1 + i] = s2[i];
+	}
+	str[len_s1 + len_s2] = '\0';
 	return (ptr);
 }
 
@@ -62,9 +74,8 @@ int	ft_include_new_line(char *str)
 		return (0);
 	while (str[i])
 	{
-		if (str[i] == '\n')
+		if (str[i++] == '\n')
 			return (1);
-		i++;
 	}
 	return (0);
 }
@@ -177,18 +188,21 @@ char	*ft_return_line(t_line *l)
 int	ft_recup_next_line(t_line *l)
 {
 	int				size_read;
+	// char			buffer[BUFFER_SIZE + 1];
 	char			*buffer;
 	char			*tmp;
 	char			*line;
+	int				lastlen;
 
 	size_read = BUFFER_SIZE;
-	buffer = NULL;
-	while (!ft_include_new_line(l->line) && size_read == BUFFER_SIZE
+	lastlen = 0;
+	buffer = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	if (!buffer)
+		return (-1);
+	*buffer = '\0';
+	while (!ft_include_new_line(buffer) && size_read == BUFFER_SIZE
 		&& size_read != -1)
 	{
-		buffer = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
-		if (!buffer)
-			return (-1);
 		size_read = read(l->fd, buffer, BUFFER_SIZE);
 		if (size_read == -1)
 		{
@@ -200,13 +214,14 @@ int	ft_recup_next_line(t_line *l)
 		{
 			buffer[size_read] = '\0';
 			line = l->line;
-			tmp = ft_strjoin(line, buffer);
-			free(l->line);
+			tmp = ft_strjoin(line, buffer, &lastlen);
 			l->line = tmp;
+			if (!tmp)
+				return (free(buffer), -1);
 		}
-		if (buffer)
-			free(buffer);
 	}
+	if (buffer)
+		free(buffer);
 	return (size_read);
 }
 
