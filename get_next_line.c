@@ -6,7 +6,7 @@
 /*   By: demane <emanedanielakim@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 14:32:17 by demane            #+#    #+#             */
-/*   Updated: 2025/11/22 19:25:06 by demane           ###   ########.fr       */
+/*   Updated: 2025/11/24 11:30:48 by demane           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ char	*ft_strjoin(char *s1, char const *s2, int *lastlen)
 		str = s1;
 	ptr = &str[0];
 	while (s2[++i])
-			str[len[0] + i] = s2[i];
+		str[len[0] + i] = s2[i];
 	return (str[len[0] + len[1]] = '\0', ptr);
 }
 

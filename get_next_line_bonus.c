@@ -36,7 +36,7 @@ char	*ft_strjoin(char *s1, char const *s2, int *lastlen)
 		str = s1;
 	ptr = &str[0];
 	while (s2[++i])
-			str[len[0] + i] = s2[i];
+		str[len[0] + i] = s2[i];
 	return (str[len[0] + len[1]] = '\0', ptr);
 }
 
