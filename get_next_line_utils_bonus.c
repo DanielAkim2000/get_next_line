@@ -6,13 +6,13 @@
 /*   By: demane <emanedanielakim@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 14:32:14 by demane            #+#    #+#             */
-/*   Updated: 2025/11/22 19:26:13 by demane           ###   ########.fr       */
+/*   Updated: 2025/12/23 15:04:25 by demane           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line_bonus.h"
+#include "get_next_line.h"
 
-ssize_t	ft_strlen(const char *str)
+ssize_t	ft_strlen_gnl(const char *str)
 {
 	size_t	i;
 
@@ -32,8 +32,8 @@ int	ft_initialize_join(char **s1, char const **s2,
 	if (!*s2)
 		*s2 = "";
 	*i = -1;
-	len[0] = ft_strlen(*s1);
-	len[1] = ft_strlen(*s2);
+	len[0] = ft_strlen_gnl(*s1);
+	len[1] = ft_strlen_gnl(*s2);
 	return (0);
 }
 
@@ -66,13 +66,15 @@ int	ft_reintialise(t_line **l)
 		while (str[j] != '\n')
 			j++;
 		lastvalue = (*l)->line;
-		(*l)->line = (char *)malloc(sizeof(char) * (ft_strlen(str) - j + 1));
+		(*l)->line = (char *)malloc(sizeof(char)
+				* (ft_strlen_gnl(str) - j + 1));
 		if ((*l)->line == NULL)
 			return (free(lastvalue), 1);
 		i = 0;
 		while (str[++j])
 			(*l)->line[i++] = str[j];
-		(*l)->line[i] = '\0';
+		if (i == 0)
+			return (free((*l)->line), (*l)->line = NULL, free(lastvalue), 0);
 		return ((*l)->line[i] = '\0', free(lastvalue), 0);
 	}
 	else

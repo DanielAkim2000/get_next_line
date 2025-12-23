@@ -6,7 +6,7 @@
 /*   By: demane <emanedanielakim@gmail.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 14:32:11 by demane            #+#    #+#             */
-/*   Updated: 2025/11/24 11:37:36 by demane           ###   ########.fr       */
+/*   Updated: 2025/12/23 15:03:46 by demane           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,12 +28,11 @@ typedef struct s_line
 }	t_line;
 
 char	*get_next_line(int fd);
-char	*ft_strjoin(char *s1, char const *s2, int *lastlen);
+char	*ft_strjoin_gnl(char *s1, char const *s2, int *lastlen);
 char	*ft_return_line(t_line *l);
 int		ft_recup_next_line(t_line *l);
 t_line	*ft_init_line(t_line *l, int fd);
-char	*get_next_line(int fd);
-ssize_t	ft_strlen(const char *str);
+ssize_t	ft_strlen_gnl(const char *str);
 int		ft_initialize_join(char **s1, char const **s2, int *i, int len[2]);
 int		ft_include_new_line(char *str);
 int		ft_reintialise(t_line **l);

@@ -10,9 +10,9 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line_bonus.h"
+#include "get_next_line.h"
 
-char	*ft_strjoin(char *s1, char const *s2, int *lastlen)
+char	*ft_strjoin_gnl(char *s1, char const *s2, int *lastlen)
 {
 	char	*str;
 	char	*ptr;
@@ -87,7 +87,7 @@ int	ft_recup_next_line(t_line *l)
 		if (size_read != -1)
 		{
 			buffer[size_read] = '\0';
-			tmp = ft_strjoin(l->line, buffer, &lastlen);
+			tmp = ft_strjoin_gnl(l->line, buffer, &lastlen);
 			l->line = tmp;
 			if (!tmp)
 				return (free(buffer), -1);
